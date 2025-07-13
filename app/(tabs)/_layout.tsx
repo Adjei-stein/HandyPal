@@ -9,7 +9,13 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  return (
+    <Tabs>
+      <Tabs.Screen name="index" options={{ title: 'Home' }} />
+      {/* Add more tabs like notifications, messages, etc */}
+    </Tabs>
+  );
+  /* const colorScheme = useColorScheme();
 
   return (
     <Tabs
@@ -41,5 +47,5 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
-  );
+  ); */
 }

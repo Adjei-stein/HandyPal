@@ -6,7 +6,7 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-
+import "../../global.css"
 
 
 import { View, Text, ScrollView, TextInput } from 'react-native';

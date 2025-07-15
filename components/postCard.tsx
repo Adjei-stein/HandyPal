@@ -29,7 +29,6 @@ export default function PostCard({
         <View className="flex-row justify-between mt-3 pr-8">
           <TouchableOpacity><Text className="text-gray-400">💬</Text></TouchableOpacity>
           <TouchableOpacity><Text className="text-gray-400">🔁</Text></TouchableOpacity>
-          <TouchableOpacity><Text className="text-gray-400">❤️</Text></TouchableOpacity>
           <TouchableOpacity><Text className="text-gray-400">📤</Text></TouchableOpacity>
         </View>
       </View>

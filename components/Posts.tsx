@@ -3,23 +3,13 @@ import PostCard from './postCard';
 
 export default function Posts() {
   return (
-    <View className="flex-1 bg-gray-900">
+    <View className="flex-1 bg-zinc-900 w-full">
         {/* Top Bar */}
-        <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200">
-            <Text className="text-xl font-bold text-white">X</Text>
-            {/* You can add profile image and icon here */}
-        </View>
-        {/* Tweet Input */}
-        <View className="flex-row items-start px-4 py-3 border-b border-gray-200 text-white">
-            <View className="w-10 h-10 bg-gray-300 rounded-full mr-3" />
-            <TextInput
-            placeholder="What is happening?!"
-            multiline
-            className="flex-1 text-base text-white"
-            />
+        <View className="flex-row items-center justify-between px-4 py-3 border-b border-zinc-700">
+            <Text className="text-xl font-bold text-white">Posts</Text>
         </View>
 
-        {/* Tweet Feed */}
+        {/* List of Posts */}
         <ScrollView>
             <PostCard
             name="Elon Musk"

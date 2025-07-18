@@ -23,21 +23,26 @@ export default function HomeScreen() {
   const isMobile = width < 768;
 
   return (
-    <View className="flex-1 w-full h-screen bg-gray-50" style={styles.mainContainer}>
-          
-      {isWeb && !isMobile ? (
-        <View className="flex-row w-full justify-center">
-          <View className="w-1/4" style={styles.widthTwentyFive}><Sidebar /></View>
-          <View className="w-2/4" style={styles.widthFifty}><Posts /></View>
-          <View className="w-1/4" style={styles.widthTwentyFive}><Opportunities /></View>
-        </View>
-      ) : (
-        <View className="w-full">
-          <Posts />
-        </View>
-      )}
+    <View className='w-full h-screen bg-zinc-900'>
 
-      
+      <View className="w-full">
+        <Text className="p-4 text-left text-white text-xl font-bold">HandyPal</Text>
+      </View>
+      <View className="flex-1 " style={styles.mainContainer}>
+        {isWeb && !isMobile ? (
+          <View className="flex-row w-full justify-center">
+            <View className="w-1/4" style={styles.widthTwentyFive}><Sidebar /></View>
+            <View className="w-2/4" style={styles.widthFifty}><Posts /></View>
+            <View className="w-1/4" style={styles.widthTwentyFive}><Opportunities /></View>
+          </View>
+        ) : (
+          <View className="w-full">
+            <Posts />
+          </View>
+        )}
+
+        
+      </View>
     </View>
   );
 }

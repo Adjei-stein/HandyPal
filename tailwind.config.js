@@ -11,6 +11,13 @@ module.exports = {
         md: "768px",
         lg: "1024px",
       },
+      fontSize: {
+        '2xl': 24, // NativeWind uses numeric sizes in pixels
+        'xl': 20,
+        'lg': 18,
+        'base': 16,
+        'sm': 14,
+      },
     },
   },
   plugins: [],

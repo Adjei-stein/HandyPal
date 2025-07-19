@@ -26,6 +26,26 @@ export default function PostCard({
         <View className="flex-row items-center flex-wrap">
           <Text className="font-bold text-white mr-1">{name}</Text>
           <Text className="text-gray-500">{handle}</Text>
+          <Text className="text-gray-600 text-xs"> · 12mins</Text>
+        </View>
+
+        <View className="flex-row items-center space-x-2 py-1">
+            <View className="bg-gray-700 rounded-full px-2 py-0.5">
+              <Text className="text-gray-200 text-xs font-semibold">
+                ForHire
+              </Text>
+            </View>
+            <Text className="text-gray-400 text-sm">📍 Kasoa, Ghana</Text>
+            <View className="bg-white/10 rounded-full px-2 py-0.5">
+              <Text className="text-white text-xs font-semibold">
+                💰 $50
+              </Text>
+            </View>
+            <View className="bg-white/10 rounded-full px-2 py-0.5">
+              <Text className="text-white text-xs font-semibold">
+                ⏳ 2 weeks
+              </Text>
+            </View>
         </View>
 
         <Text className="text-white mt-1">{content}</Text>

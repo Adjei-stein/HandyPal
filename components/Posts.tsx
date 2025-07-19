@@ -12,21 +12,21 @@ export default function Posts() {
         {/* List of Posts */}
         <ScrollView>
             <PostCard
-            name="Elon Musk"
-            handle="@elonmusk"
-            content="Sending thoughts from Mars 🚀"
+            name="Paul Steiner"
+            handle="@paulsteiner"
+            content="Need a gardener to help with my backyard. DM me if interested!"
             avatarColor="bg-blue-500"
             />
             <PostCard
             name="Sundar Pichai"
             handle="@sundarpichai"
-            content="Announcing a new AI breakthrough!"
+            content="Skilled chef here. Looking for part-time gigs in the city. Kindly reach out!"
             avatarColor="bg-green-500"
             />
             <PostCard
             name="Ada Lovelace"
             handle="@ada"
-            content="Math is poetry in motion."
+            content="Today, I showcase my some of my best interior design work. Always open to more opportunities!"
             avatarColor="bg-purple-500"
             />
         </ScrollView>

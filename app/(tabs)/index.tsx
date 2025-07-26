@@ -1,26 +1,33 @@
-import { Image } from 'expo-image';
 import { Platform, StyleSheet } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 
-import "../../global.css"
+import "../../global.css";
 
 
-import { View, Text, ScrollView, TextInput, useWindowDimensions } from 'react-native';
-import PostCard from '@/components/postCard';
-import Posts from '@/components/Posts';
+
 import Opportunities from '@/components/Opportunities';
-import Sidebar from '@/components/Sidebar';
-import Messages from '@/components/Messages';
-import Sales from '@/components/Sales';
+import Posts from '@/components/Posts';
+import UserProfile from '@/components/userProfile';
+import { Text, useWindowDimensions, View } from 'react-native';
+;
+
+const generateDummyProfile = () => {
+  return {
+    name: 'John Doe',
+    bio: 'Handyman with 5 years of experience',
+    location: 'New York, NY',
+    skills: ['Plumbing', 'Electrical', 'Carpentry'],
+    rating: 4.8,
+    completedJobs: 42,
+    profileImage: require('@/assets/images/adaptive-icon.png')
+  };
+};
 
 export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const isWeb = Platform.OS === 'web';
   const isMobile = width < 768;
+  const dummyProfile = generateDummyProfile();
 
   return (
     <View className='w-full h-screen bg-zinc-900'>
@@ -31,8 +38,22 @@ export default function HomeScreen() {
       <View className="flex-1 " style={styles.mainContainer}>
         {isWeb && !isMobile ? (
           <View className="flex-row w-full justify-center">
-            <View className="w-1/4" style={styles.widthTwentyFive}><Sidebar /></View>
-            <View className="w-2/4" style={styles.widthFifty}><Posts /></View>
+            <View className="w-1/4" style={styles.widthTwentyFive}><UserProfile 
+              avatarColor="bg-blue-500"
+              name={dummyProfile.name}
+              handle="handyman"
+              bio={dummyProfile.bio}
+              location={dummyProfile.location}
+              skills={dummyProfile.skills}
+              followers={42}
+              following={24}
+              posts={15}
+              joinDate="Jan 2023"
+              status="Available"
+              rate="$50/hr"
+              availability="Weekdays"
+            /></View>
+            <View className="w-2/4 border-solid border-l border-r border-zinc-700 border-b-0 border-t-0" style={[styles.widthFifty, {borderLeftWidth: 1, borderRightWidth: 1}]}><Posts /></View>
             <View className="w-1/4" style={styles.widthTwentyFive}><Opportunities /></View>
           </View>
         ) : (

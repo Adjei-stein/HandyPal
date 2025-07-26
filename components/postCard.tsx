@@ -36,16 +36,19 @@ export default function PostCard({
 
 
   return (
-    <View style={styles.zIndexZero} className="flex-row px-4 py-3 border-b border-zinc-700 relative">
+    <View className="flex-row px-4 py-3 border-b border-zinc-700 relative">
       <View className={`w-10 h-10 rounded-full ${avatarColor} mr-3`} />
 
       <View className="flex-1">
         <View className="flex-row justify-between items-center">
           {/* Left side: name, handle, time */}
-          <View className="flex-row items-center flex-wrap">
+          <View
+            style={styles.zIndexZero}
+            className="flex-row items-center flex-wrap"
+          >
             <Text className="font-bold text-white mr-1">{name}</Text>
             <Text className="text-gray-500">{handle}</Text>
-            <Text className="text-gray-600 text-xs"> · 12mmin</Text>
+            <Text className="text-gray-600 text-xs"> · 12min</Text>
           </View>
 
 
@@ -56,7 +59,10 @@ export default function PostCard({
             </TouchableOpacity>
 
             {showMenu && (
-              <View style={styles.zIndexHundred} className="absolute right-0 top-6 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg overflow-hidden">
+              <View
+                style={[styles.zIndexHundred, { opacity: 1 }]}
+                className="absolute right-0 top-6 bg-zinc-700 border border-zinc-600 rounded-md shadow-lg overflow-hidden"
+              >
                 <TouchableOpacity
                   onPress={handleVisitProfile}
                   className="px-4 py-2"
@@ -118,8 +124,10 @@ const styles = StyleSheet.create({
   },
   zIndexHundred: {
     zIndex: 999,
+    elevation: 999,
   },
   zIndexZero: {
     zIndex: 0,
+    elevation: 0
   }
 });

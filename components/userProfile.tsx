@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface UserProfileProps {
   avatarColor: string;
@@ -65,7 +66,10 @@ export default function UserProfile({
       {/* Location & Website */}
       <View className="flex-row items-center space-x-4 mb-3">
         <View className="flex-row items-center">
-          <Text className="text-gray-400">📍 {location}</Text>
+          <View className="flex-row items-center">
+            <Icon name="location-pin" size={12} color="red" />
+            <Text className="text-gray-400 ml-1">{location}</Text>
+          </View>
         </View>
         {website && (
           <TouchableOpacity>
@@ -96,7 +100,7 @@ export default function UserProfile({
           <Text className="text-gray-200 text-xs font-semibold">{status}</Text>
         </View>
         <View className="bg-white/10 rounded-full px-2 py-0.5">
-          <Text className="text-white text-xs font-semibold">💰 {rate}</Text>
+          <Text className="text-white text-xs font-semibold"><Icon name="dollar-sign" size={12} color="white" /> {rate}</Text>
         </View>
         <View className="bg-white/10 rounded-full px-2 py-0.5">
           <Text className="text-white text-xs font-semibold">⏳ {availability}</Text>

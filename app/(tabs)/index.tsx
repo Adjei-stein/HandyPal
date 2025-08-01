@@ -4,12 +4,12 @@ import { Platform, StyleSheet } from 'react-native';
 import "../../global.css";
 
 
-
-import Opportunities from '@/components/Opportunities';
+import ChatPage from '@/components/ChatPage';
+import InboxPage from '@/components/InboxPage';
 import Posts from '@/components/Posts';
 import UserProfile from '@/components/userProfile';
+import { useState } from 'react';
 import { Text, useWindowDimensions, View } from 'react-native';
-;
 
 const generateDummyProfile = () => {
   return {
@@ -28,6 +28,7 @@ export default function HomeScreen() {
   const isWeb = Platform.OS === 'web';
   const isMobile = width < 768;
   const dummyProfile = generateDummyProfile();
+  const [selectedConversation, setSelectedConversation] = useState(null);
 
   return (
     <View className='w-full h-screen bg-zinc-900'>
@@ -54,7 +55,13 @@ export default function HomeScreen() {
               availability="Weekdays"
             /></View>
             <View className="w-2/4 border-solid border-l border-r border-zinc-700 border-b-0 border-t-0" style={[styles.widthFifty, {borderLeftWidth: 1, borderRightWidth: 1}]}><Posts /></View>
-            <View className="w-1/4" style={styles.widthTwentyFive}><Opportunities /></View>
+            <View className="w-1/4" style={styles.widthTwentyFive}>
+              {selectedConversation ? (
+                <ChatPage conversation={selectedConversation} onBack={() => setSelectedConversation(null)} />
+              ) : (
+                <InboxPage onSelectConversation={setSelectedConversation} />
+              )}
+            </View>
           </View>
         ) : (
           <View className="w-full">

@@ -1,7 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface PostCardProps {
   name: string;
@@ -86,15 +88,15 @@ export default function PostCard({
                 ForHire
               </Text>
             </View>
-            <Text className="text-gray-400 text-sm">📍 Kasoa, Ghana</Text>
+            <Text className="text-gray-400 text-sm"><Icon name="location-pin" size={12} color="red" /> Kasoa, Ghana</Text>
             <View className="bg-white/10 rounded-full px-2 py-0.5">
               <Text className="text-white text-xs font-semibold">
-                💰 $50
+                <FontAwesome name="money" size={12} color="green" /> $50
               </Text>
             </View>
             <View className="bg-white/10 rounded-full px-2 py-0.5">
               <Text className="text-white text-xs font-semibold">
-                ⏳ 2 weeks
+                <MaterialCommunityIcons name="timer-sand-complete" size={12} color="grey" /> 2 weeks
               </Text>
             </View>
         </View>
@@ -103,11 +105,11 @@ export default function PostCard({
 
 
         <View className="flex-row justify-between mt-3 pr-8">
-          <TouchableOpacity><Text className="text-gray-400">💬</Text></TouchableOpacity>
-          <TouchableOpacity><Text className="text-gray-400">🔁</Text></TouchableOpacity>
+          <TouchableOpacity><Icon name="comment" size={20} color="#9ca3af" /></TouchableOpacity>
+          <TouchableOpacity><Icon name="repeat" size={20} color="#9ca3af" /></TouchableOpacity>
           <TouchableOpacity
           //onPress={() => navigation.navigate()} // replace with your actual screen name
-          ><Text className="text-gray-400">➡️</Text></TouchableOpacity>
+          ><Icon name="arrow-right" size={20} color="#9ca3af" /></TouchableOpacity>
         </View>
       </View>
     </View>

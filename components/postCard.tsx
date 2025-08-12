@@ -1,9 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface PostCardProps {
   name: string;
@@ -91,7 +91,7 @@ export default function PostCard({
             <Text className="text-gray-400 text-sm"><Icon name="location-pin" size={12} color="red" /> Kasoa, Ghana</Text>
             <View className="bg-white/10 rounded-full px-2 py-0.5">
               <Text className="text-white text-xs font-semibold">
-                <FontAwesome name="money" size={12} color="green" /> $50
+                <FontAwesome name="money" size={12} color="green" /> GH₵ 50
               </Text>
             </View>
             <View className="bg-white/10 rounded-full px-2 py-0.5">

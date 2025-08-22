@@ -7,8 +7,9 @@ import "../../global.css";
 import ChatPage from '@/components/ChatPage';
 import InboxPage from '@/components/InboxPage';
 import Posts from '@/components/Posts';
-import UserProfile from '@/components/userProfile';
+import MarketPlace from '@/components/MarketPlace';
 import NavigationBar from '@/components/Navigationbar';
+import UserProfile from '@/components/userProfile';
 import { useState } from 'react';
 import { Text, useWindowDimensions, View } from 'react-native';
 
@@ -32,7 +33,7 @@ export default function HomeScreen() {
   const [selectedConversation, setSelectedConversation] = useState(null);
 
   return (
-    <View className='w-full h-screen bg-zinc-900'>
+    <View className='w-full flex-1 bg-zinc-900'>
 
       <View className="w-full">
         <Text className="p-4 text-left text-white text-xl font-bold">HandyPal</Text>
@@ -55,7 +56,7 @@ export default function HomeScreen() {
               rate="$50/hr"
               availability="Weekdays"
             /></View>
-            <View className="w-2/4 border-solid border-l border-r border-zinc-700 border-b-0 border-t-0" style={[styles.widthFifty, {borderLeftWidth: 1, borderRightWidth: 1}]}><NavigationBar /><Posts /></View>
+            <View className="w-2/4 border-solid border-l border-r border-zinc-700 border-b-0 border-t-0" style={[styles.widthFifty, {borderLeftWidth: 1, borderRightWidth: 1}]}><NavigationBar /><MarketPlace /></View>
             <View className="w-1/4" style={styles.widthTwentyFive}>
               {selectedConversation ? (
                 <ChatPage conversation={selectedConversation} onBack={() => setSelectedConversation(null)} />
@@ -66,7 +67,7 @@ export default function HomeScreen() {
           </View>
         ) : (
           <View className="w-full">
-            <Posts />
+            <MarketPlace />
           </View>
         )}
 

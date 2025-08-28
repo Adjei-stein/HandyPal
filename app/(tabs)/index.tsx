@@ -8,6 +8,7 @@ import ChatPage from '@/components/ChatPage';
 import InboxPage from '@/components/InboxPage';
 import Posts from '@/components/Posts';
 import MarketPlace from '@/components/MarketPlace';
+import Jobs from '@/components/Jobs';
 import NavigationBar from '@/components/Navigationbar';
 import UserProfile from '@/components/userProfile';
 import { useState } from 'react';
@@ -56,7 +57,7 @@ export default function HomeScreen() {
               rate="$50/hr"
               availability="Weekdays"
             /></View>
-            <View className="w-2/4 border-solid border-l border-r border-zinc-700 border-b-0 border-t-0" style={[styles.widthFifty, {borderLeftWidth: 1, borderRightWidth: 1}]}><NavigationBar /><MarketPlace /></View>
+            <View className="w-2/4 border-solid border-l border-r border-zinc-700 border-b-0 border-t-0" style={[styles.widthFifty, {borderLeftWidth: 1, borderRightWidth: 1}]}><NavigationBar /><Jobs /></View>
             <View className="w-1/4" style={styles.widthTwentyFive}>
               {selectedConversation ? (
                 <ChatPage conversation={selectedConversation} onBack={() => setSelectedConversation(null)} />

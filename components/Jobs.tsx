@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FlatList, Image, Modal, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, Modal, SafeAreaView, ScrollView, Text, TouchableOpacity, ImageSourcePropType, View } from 'react-native';
 
 const jobs = [
   {
@@ -13,9 +13,8 @@ const jobs = [
     timeOfDay: 'Afternoon',
     description: 'Looking for someone to wash my car. All supplies will be provided.',
     images: [
-      'https://via.placeholder.com/300/FF0000/FFFFFF?text=Car+Wash+1',
-      'https://via.placeholder.com/300/00FF00/FFFFFF?text=Car+Wash+2',
-      'https://via.placeholder.com/300/0000FF/FFFFFF?text=Car+Wash+3',
+      require('../assets/images/photo_2025-08-29_11-40-04.jpg'),
+      require('../assets/images/photo_2025-08-29_11-38-04.jpg'),
     ],
   },
   {
@@ -29,8 +28,7 @@ const jobs = [
     timeOfDay: 'Morning',
     description: 'Need a reliable person to walk my dog every weekday morning.',
     images: [
-      'https://via.placeholder.com/300/FFFF00/000000?text=Dog+Walking+1',
-      'https://via.placeholder.com/300/FF00FF/FFFFFF?text=Dog+Walking+2',
+      require('../assets/images/photo_2025-08-29_11-38-09.jpg'),
     ],
   },
   {
@@ -44,7 +42,8 @@ const jobs = [
     timeOfDay: 'Morning',
     description: 'Deep cleaning for a 2-bedroom apartment before moving out.',
     images: [
-      'https://via.placeholder.com/300/00FFFF/000000?text=Cleaning+1',
+      require('../assets/images/photo_2025-08-29_11-38-12.jpg'),
+      require('../assets/images/photo_2025-08-29_11-38-15.jpg'),
     ],
   },
 ];
@@ -59,21 +58,25 @@ type Job = {
   duration: string;
   timeOfDay: string;
   description: string;
-  images: string[];
+  images: ImageSourcePropType[];
 };
 
 type JobCardProps = {
   job: Job;
-  onImagePress: (images: string[]) => void;
+  onImagePress: (images: ImageSourcePropType[]) => void;
 };
 
 const JobCard: React.FC<JobCardProps> = ({ job, onImagePress }) => (
   <View className="bg-zinc-800 rounded-lg p-4 mb-4">
     <View className="flex-row">
-      <TouchableOpacity onPress={() => onImagePress(job.images)} className="w-1/3 h-32 mr-4">
-        <Image source={{ uri: job.images[0] }} className="w-full h-full rounded-lg" resizeMode="cover" />
+      <TouchableOpacity onPress={() => onImagePress(job.images)} className="w-64 h-64">
+        <Image
+            source={job.images[0]}
+            style={{ width: '100%', height: '100%', borderRadius: 8 }}
+            resizeMode="cover"
+        />
       </TouchableOpacity>
-      <View className="flex-1">
+      <View className="flex-1 pl-4">
         <Text className="text-white text-lg font-bold">{job.title}</Text>
         <Text className="text-gray-400">{job.location}</Text>
         <View className="flex-row flex-wrap my-2">
@@ -101,9 +104,9 @@ const JobCard: React.FC<JobCardProps> = ({ job, onImagePress }) => (
 
 const Jobs = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<ImageSourcePropType[]>([]);
 
-  const handleImagePress = (images: string[]) => {
+  const handleImagePress = (images: ImageSourcePropType[]) => {
     setSelectedImages(images);
     setModalVisible(true);
   };
@@ -126,8 +129,8 @@ const Jobs = () => {
             <Text className="text-white text-lg">Close</Text>
           </TouchableOpacity>
           <ScrollView horizontal pagingEnabled>
-            {selectedImages.map((uri, index) => (
-              <Image key={index} source={{ uri }} className="w-screen h-full" resizeMode="contain" />
+            {selectedImages.map((imgSrc, index) => (
+              <Image key={index} source={imgSrc} className="w-screen h-full" resizeMode="contain" />
             ))}
           </ScrollView>
         </SafeAreaView>

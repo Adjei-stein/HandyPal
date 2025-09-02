@@ -9,13 +9,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
-  return (
-    <Tabs>
-      <Tabs.Screen name="index" options={{ title: 'Home' }} />
-      {/* Add more tabs like notifications, messages, etc */}
-    </Tabs>
-  );
-  /* const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme();
 
   return (
     <Tabs
@@ -46,6 +40,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="jobs"
+        options={{
+          title: 'Jobs',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="briefcase.fill" color={color} />,
+        }}
+      />
     </Tabs>
-  ); */
+  );
 }

@@ -1,3 +1,4 @@
+import { Handshake, Lock } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Dimensions, FlatList, Image, ImageSourcePropType, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -91,9 +92,20 @@ const JobCard: React.FC<JobCardProps> = ({ job, onImagePress }) => (
             <Text className="text-white text-sm">{job.timeOfDay}</Text>
           </View>
         </View>
-        <Text className="text-green-400 text-xl font-bold">
-          ${job.amount} {job.negotiable && <Text className="text-gray-400 text-sm bg-zinc-500 rounded-lg p-2">Negotiable</Text>}
-        </Text>
+        <View className="flex-row items-center">
+          <Text className="text-green-400 text-xl font-bold">${job.amount}</Text>
+          {job.negotiable ? (
+            <View className="ml-2 bg-green-100 border border-green-300 rounded-full px-2 py-0.5 flex-row items-center">
+              <Handshake size={12} color="#166534" />
+              <Text className="text-green-700 text-xs font-semibold ml-1">Negotiable</Text>
+            </View>
+          ) : (
+            <View className="ml-2 bg-red-100 border border-red-300 rounded-full px-2 py-0.5 flex-row items-center">
+              <Lock size={12} color="#991b1b" />
+              <Text className="text-red-700 text-xs font-semibold ml-1">Non-Negotiable</Text>
+            </View>
+          )}
+        </View>
       </View>
     </View>
     <Text className="text-gray-300 my-2">{job.description}</Text>

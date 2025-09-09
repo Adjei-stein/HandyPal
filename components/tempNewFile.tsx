@@ -146,30 +146,22 @@ const JobCard: React.FC<JobCardProps> = ({ job, onImagePress }) => (
 );
 
 const SCROLLBAR_WIDTH = 4;
-const MIN_THUMB_HEIGHT = 20;
+const THUMB_HEIGHT = 60;
 
 const Jobs = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImages, setSelectedImages] = useState<ImageSourcePropType[]>([]);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [listHeight, setListHeight] = useState(0);
-  const [contentHeight, setContentHeight] = useState(0);
 
   const scrollY = useRef(new Animated.Value(0)).current;
+  const listHeight = useRef(1);
+  const contentHeight = useRef(1);
 
-  const thumbHeight =
-    listHeight > 0 && contentHeight > listHeight
-      ? Math.max((listHeight / contentHeight) * listHeight, MIN_THUMB_HEIGHT)
-      : 0;
-
-  const scrollThumbY =
-    listHeight > 0 && contentHeight > listHeight
-      ? scrollY.interpolate({
-          inputRange: [0, contentHeight - listHeight],
-          outputRange: [0, listHeight - thumbHeight],
-          extrapolate: 'clamp',
-        })
-      : 0;
+  const scrollThumbY = scrollY.interpolate({
+    inputRange: [0, Math.max(1, contentHeight.current - listHeight.current)],
+    outputRange: [0, listHeight.current - THUMB_HEIGHT],
+    extrapolate: 'clamp',
+  });
 
   const handleImagePress = (images: ImageSourcePropType[]) => {
     setSelectedImages(images);
@@ -186,10 +178,10 @@ const Jobs = () => {
           contentContainerStyle={{ padding: 16, paddingRight: 20 }} // leave space for scrollbar
           showsVerticalScrollIndicator={false}
           onLayout={(e) => {
-            setListHeight(e.nativeEvent.layout.height);
+            listHeight.current = e.nativeEvent.layout.height;
           }}
           onContentSizeChange={(w, h) => {
-            setContentHeight(h);
+            contentHeight.current = h;
           }}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -199,29 +191,27 @@ const Jobs = () => {
         />
 
         {/* Custom Scrollbar */}
-        {thumbHeight > 0 && (
-          <View
+        <View
+          style={{
+            position: 'absolute',
+            right: 6,
+            top: 0,
+            bottom: 0,
+            width: SCROLLBAR_WIDTH,
+            backgroundColor: '#3f3f46', // track
+            borderRadius: SCROLLBAR_WIDTH / 2,
+          }}
+        >
+          <Animated.View
             style={{
-              position: 'absolute',
-              right: 6,
-              top: 0,
-              bottom: 0,
               width: SCROLLBAR_WIDTH,
-              backgroundColor: '#3f3f46', // track
+              height: THUMB_HEIGHT,
               borderRadius: SCROLLBAR_WIDTH / 2,
+              backgroundColor: 'white',
+              transform: [{ translateY: scrollThumbY }],
             }}
-          >
-            <Animated.View
-              style={{
-                width: SCROLLBAR_WIDTH,
-                height: thumbHeight,
-                borderRadius: SCROLLBAR_WIDTH / 2,
-                backgroundColor: 'white',
-                transform: [{ translateY: scrollThumbY }],
-              }}
-            />
-          </View>
-        )}
+          />
+        </View>
       </View>
 
       {/* Floating button */}

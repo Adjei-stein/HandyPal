@@ -11,6 +11,7 @@ import MarketPlace from '@/components/MarketPlace';
 import Jobs from '@/components/Jobs';
 import NavigationBar from '@/components/Navigationbar';
 import UserProfile from '@/components/userProfile';
+import UserSideNav from '@/components/userSideNav'
 import { useState } from 'react';
 import { Text, useWindowDimensions, View } from 'react-native';
 
@@ -42,11 +43,11 @@ export default function HomeScreen() {
       <View className="flex-1 " style={styles.mainContainer}>
         {isWeb && !isMobile ? (
           <View className="flex-row w-full justify-center">
-            <View className="w-1/4" style={styles.widthTwentyFive}><UserProfile 
+            <View className="w-1/4" style={styles.widthTwentyFive}><UserSideNav 
               avatarColor="bg-blue-500"
               name={dummyProfile.name}
               handle="handyman"
-              bio={dummyProfile.bio}
+              /* bio={dummyProfile.bio}
               location={dummyProfile.location}
               skills={dummyProfile.skills}
               followers={42}
@@ -55,9 +56,9 @@ export default function HomeScreen() {
               joinDate="Jan 2023"
               status="Available"
               rate="$50/hr"
-              availability="Weekdays"
+              availability="Weekdays" */
             /></View>
-            <View className="w-2/4 border-solid border-l border-r border-zinc-700 border-b-0 border-t-0" style={[styles.widthFifty, {borderLeftWidth: 1, borderRightWidth: 1}]}><NavigationBar /><Jobs /></View>
+            <View className="w-2/4 border-solid border-l border-r border-zinc-700 border-b-0 border-t-0" style={[styles.widthFifty, {borderLeftWidth: 1, borderRightWidth: 1}]}><Jobs /></View>
             <View className="w-1/4" style={styles.widthTwentyFive}>
               {selectedConversation ? (
                 <ChatPage conversation={selectedConversation} onBack={() => setSelectedConversation(null)} />

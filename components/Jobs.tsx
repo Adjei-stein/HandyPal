@@ -136,7 +136,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, onImagePress }) => (
             <Text className="text-gray-300 my-2">{job.description}</Text>
             <View className="border-t border-gray-700 my-2" />
             <View className="flex-row justify-end">
-                <TouchableOpacity className="bg-blue-600 rounded-full py-2 px-4">
+                <TouchableOpacity className="bg-blue-500 rounded-full py-2 px-4">
                 <Text className="text-white font-bold text-sm">View Job</Text>
                 </TouchableOpacity>
             </View>
@@ -230,7 +230,6 @@ const Jobs = () => {
           position: 'absolute',
           bottom: 32,
           right: 32,
-          backgroundColor: '#2563eb',
           width: 64,
           height: 64,
           borderRadius: 32,
@@ -242,6 +241,7 @@ const Jobs = () => {
           shadowRadius: 3.84,
           elevation: 5,
         }}
+        className='bg-zinc-500'
         onPress={() => setCreateModalVisible(true)}
       >
         <MaterialCommunityIcons name="briefcase-plus-outline" size={30} color="white" />

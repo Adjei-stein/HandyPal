@@ -6,14 +6,14 @@ import "../../global.css";
 
 import ChatPage from '@/components/ChatPage';
 import InboxPage from '@/components/InboxPage';
-import Posts from '@/components/Posts';
-import MarketPlace from '@/components/MarketPlace';
 import Jobs from '@/components/Jobs';
+import Posts from '@/components/Posts';
 import NavigationBar from '@/components/Navigationbar';
 import UserProfile from '@/components/userProfile';
-import UserSideNav from '@/components/userSideNav'
+import MarketPlace from '@/components/MarketPlace';
+import UserSideNav from '@/components/userSideNav';
 import { useState } from 'react';
-import { Text, useWindowDimensions, View } from 'react-native';
+import { Image, useWindowDimensions, View } from 'react-native';
 
 const generateDummyProfile = () => {
   return {
@@ -37,8 +37,8 @@ export default function HomeScreen() {
   return (
     <View className='w-full flex-1 bg-zinc-900'>
 
-      <View className="w-full">
-        <Text className="p-4 text-left text-white text-xl font-bold">HandyPal</Text>
+      <View className="w-full my-2 p-2">
+        <Image source={require('@/assets/images/app-logos/handypal-high-resolution-logo-png-dark-mode.png')} style={{width: 175, height: 50, margin: 10}} />
       </View>
       <View className="flex-1 " style={styles.mainContainer}>
         {isWeb && !isMobile ? (

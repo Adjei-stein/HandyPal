@@ -1,5 +1,6 @@
-import { BadgeCent, Bookmark, Calendar1, Handshake, Lock, MapPin } from 'lucide-react-native';
-import React, { useRef, useState } from 'react';
+import { BlurView } from 'expo-blur';
+import { BadgeCent, Bookmark, Calendar1, ChevronLeft, ChevronRight, Handshake, Lock, MapPin, X } from 'lucide-react-native';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -8,19 +9,20 @@ import {
   ImageSourcePropType,
   Modal,
   SafeAreaView,
-  ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CreateJob from './CreateJob';
+import FilterInput from './FilterInput';
 
 const jobs = [
   {
     id: '1',
     title: 'Car Wash',
-    location: 'San Francisco, CA',
+    location: 'Kasoa, Central Region',
     jobType: 'One-time',
     amount: 50,
     negotiable: true,
@@ -35,7 +37,7 @@ const jobs = [
   {
     id: '2',
     title: 'Dog Walker',
-    location: 'New York, NY',
+    location: 'East Legon, Greater Accra Region',
     jobType: 'Recurring',
     amount: 25,
     negotiable: false,
@@ -49,7 +51,7 @@ const jobs = [
   {
     id: '3',
     title: 'House Cleaning',
-    location: 'Austin, TX',
+    location: 'Adenta, Greater Accra Region',
     jobType: 'One-time',
     amount: 150,
     negotiable: true,
@@ -109,7 +111,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, onImagePress }) => (
             </View>
             <View className="flex-row items-center py-1">
                 <BadgeCent size={15} className='text-white' />
-                <Text className="text-gray-400 text-xs pl-1">GHC {job.amount}.00</Text>
+                <Text className="text-gray-400 text-xs pl-1">GH₵ {job.amount}.00</Text>
                 {job.negotiable ? (
                 <View className="ml-2 bg-green-100 border border-green-300 rounded-full px-2 py-0.5 flex-row items-center">
                     <Handshake size={12} color="#166534" />
@@ -151,6 +153,7 @@ const MIN_THUMB_HEIGHT = 20;
 const Jobs = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImages, setSelectedImages] = useState<ImageSourcePropType[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [listHeight, setListHeight] = useState(0);
   const [contentHeight, setContentHeight] = useState(0);
@@ -173,14 +176,23 @@ const Jobs = () => {
 
   const handleImagePress = (images: ImageSourcePropType[]) => {
     setSelectedImages(images);
+    setCurrentImageIndex(0);
     setModalVisible(true);
   };
 
+  const filteredJobs = useMemo(() => {
+    return jobs;
+  }, [jobs]);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#18181b' }}>
+      <View style={styles.filterContainer}>
+        <FilterInput />
+      </View>
+
       <View style={{ flex: 1 }}>
         <FlatList
-          data={jobs}
+          data={filteredJobs}
           renderItem={({ item }) => <JobCard job={item} onImagePress={handleImagePress} />}
           keyExtractor={item => item.id}
           contentContainerStyle={{ padding: 16, paddingRight: 20 }} // leave space for scrollbar
@@ -249,31 +261,117 @@ const Jobs = () => {
 
       {/* Image viewer modal */}
       <Modal
-        animationType="slide"
-        transparent={false}
+        animationType="fade"
+        transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
-          <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 16 }}>
-            <Text style={{ color: 'white', fontSize: 18 }}>Close</Text>
-          </TouchableOpacity>
-          <ScrollView horizontal pagingEnabled>
-            {selectedImages.map((img, index) => (
-              <Image
-                key={index}
-                source={img}
-                style={{ width: Dimensions.get('window').width, height: '100%' }}
-                resizeMode="contain"
-              />
-            ))}
-          </ScrollView>
-        </SafeAreaView>
+        <BlurView intensity={80} tint="dark" style={styles.absolute}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            
+            {/* Main content container */}
+            <View style={{
+                width: Dimensions.get('window').width,
+                height: Dimensions.get('window').height * 0.6, // 60% of screen height
+                justifyContent: 'center',
+                alignItems: 'center',
+            }}>
+                {selectedImages.length > 0 && (
+                    <Image
+                        source={selectedImages[currentImageIndex]}
+                        style={{ width: '100%', height: '100%' }}
+                        resizeMode="contain"
+                    />
+                )}
+            </View>
+
+            {/* Close Button */}
+            <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={{ position: 'absolute', top: '20%', right: '5%' }}
+            >
+                <X size={30} color="white" />
+            </TouchableOpacity>
+
+            {/* Navigation Buttons */}
+            {selectedImages.length > 1 && (
+                <>
+                    {/* Previous Button */}
+                    <TouchableOpacity
+                        onPress={() => setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : selectedImages.length - 1))}
+                        style={{ position: 'absolute', left: 15, top: '50%', transform: [{ translateY: -15 }] }}
+                    >
+                        <ChevronLeft size={30} color="white" />
+                    </TouchableOpacity>
+                    {/* Next Button */}
+                    <TouchableOpacity
+                        onPress={() => setCurrentImageIndex((prev) => (prev < selectedImages.length - 1 ? prev + 1 : 0))}
+                        style={{ position: 'absolute', right: 15, top: '50%', transform: [{ translateY: -15 }] }}
+                    >
+                        <ChevronRight size={30} color="white" />
+                    </TouchableOpacity>
+                </>
+            )}
+        </View>
+        </BlurView>
       </Modal>
 
       {createModalVisible && <CreateJob setCreateModalVisible={setCreateModalVisible} />}
     </SafeAreaView>
   );
 };
+
+
+const styles = StyleSheet.create({
+  absolute: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    padding: 10,
+    backgroundColor: '#27272a',
+    position: 'relative',
+    zIndex: 10,
+  },
+  input: {
+    flex: 1,
+    height: 40,
+    backgroundColor: '#3f3f46',
+    borderRadius: 5,
+    color: 'white',
+    paddingHorizontal: 10,
+    marginHorizontal: 5,
+  },
+  dropdownButton: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  dropdownButtonText: {
+    color: 'white',
+  },
+  dropdownOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  dropdownContainer: {
+    position: 'absolute',
+    backgroundColor: '#3f3f46',
+    borderRadius: 5,
+    maxHeight: 200,
+    zIndex: 1,
+  },
+  dropdownItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#52525b',
+  },
+  dropdownItemText: {
+    color: 'white',
+    fontSize: 16,
+  },
+});
 
 export default Jobs;

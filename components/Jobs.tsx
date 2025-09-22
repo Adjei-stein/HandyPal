@@ -1,5 +1,5 @@
 import { BlurView } from 'expo-blur';
-import { BadgeCent, Bookmark, Calendar1, ChevronLeft, ChevronRight, Handshake, Lock, MapPin, X } from 'lucide-react-native';
+import { BadgeCent, Bookmark, Calendar1, ChevronLeft, ChevronRight, Handshake, Lock, MapPin, X, ListFilter } from 'lucide-react-native';
 import React, { useMemo, useRef, useState } from 'react';
 import {
   Animated,
@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CreateJob from './CreateJob';
-import FilterInput from './FilterInput';
+import FilterPopup from './FilterPopup';
 
 const jobs = [
   {
@@ -157,6 +157,8 @@ const Jobs = () => {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [listHeight, setListHeight] = useState(0);
   const [contentHeight, setContentHeight] = useState(0);
+  const [filters, setFilters] = useState<string[]>([]);
+  const [isFilterPopupVisible, setIsFilterPopupVisible] = useState(false);
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -180,15 +182,22 @@ const Jobs = () => {
     setModalVisible(true);
   };
 
+  const handleApplyFilters = (appliedFilters: string[]) => {
+    setFilters(appliedFilters);
+  };
+
   const filteredJobs = useMemo(() => {
-    return jobs;
-  }, [jobs]);
+    if (filters.length === 0) {
+      return jobs;
+    }
+    return jobs.filter(job => {
+      const jobTags = [job.title, job.location, job.jobType, job.timeOfDay].flatMap(s => s.toLowerCase().split(/\s+/));
+      return filters.every(filter => jobTags.includes(filter.toLowerCase()));
+    });
+  }, [jobs, filters]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#18181b' }}>
-      <View style={styles.filterContainer}>
-        <FilterInput />
-      </View>
 
       <View style={{ flex: 1 }}>
         <FlatList
@@ -236,7 +245,33 @@ const Jobs = () => {
         )}
       </View>
 
-      {/* Floating button */}
+      {isFilterPopupVisible && <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />}
+
+      {/* Floating filter button */}
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          bottom: 102,
+          right: 42,
+          width: 44,
+          height: 44,
+          borderRadius: 32,
+          justifyContent: 'center',
+          alignItems: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
+        }}
+        className='bg-zinc-500'
+        onPress={() => setIsFilterPopupVisible(true)}
+      >
+        <ListFilter size={30} color="white" />
+      </TouchableOpacity>
+
+
+      {/* Floating New Job button */}
       <TouchableOpacity
         style={{
           position: 'absolute',
@@ -258,6 +293,12 @@ const Jobs = () => {
       >
         <MaterialCommunityIcons name="briefcase-plus-outline" size={30} color="white" />
       </TouchableOpacity>
+
+      <FilterPopup
+        visible={isFilterPopupVisible}
+        onClose={() => setIsFilterPopupVisible(false)}
+        onApply={handleApplyFilters}
+      />
 
       {/* Image viewer modal */}
       <Modal
@@ -326,16 +367,23 @@ const styles = StyleSheet.create({
   absolute: {
     ...StyleSheet.absoluteFillObject,
   },
-  filterContainer: {
-    flexDirection: 'row',
+  headerContainer: {
     padding: 10,
-    backgroundColor: '#27272a',
-    position: 'relative',
-    zIndex: 10,
+    backgroundColor: '#18181b',
   },
-  input: {
+  filterButton: {
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  filterButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  container: {
     flex: 1,
-    height: 40,
     backgroundColor: '#3f3f46',
     borderRadius: 5,
     color: 'white',

@@ -1,19 +1,28 @@
 import { Platform, StyleSheet } from 'react-native';
-
+import React, { useRef, useState } from 'react';
+import { 
+  Gesture, 
+  GestureDetector, 
+  GestureHandlerRootView, 
+  ScrollView
+} from 'react-native-gesture-handler';
+import Animated, { 
+  useAnimatedStyle, 
+  useSharedValue, 
+  withSpring, 
+  runOnJS,
+  interpolate,
+  Extrapolate
+} from 'react-native-reanimated';
+import { Image, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { Menu } from 'lucide-react-native';
 
 import "../../global.css";
-
-
 import ChatPage from '@/components/ChatPage';
 import InboxPage from '@/components/InboxPage';
 import Jobs from '@/components/Jobs';
-import Posts from '@/components/Posts';
-import NavigationBar from '@/components/Navigationbar';
-import UserProfile from '@/components/userProfile';
 import MarketPlace from '@/components/MarketPlace';
 import UserSideNav from '@/components/userSideNav';
-import { useState } from 'react';
-import { Image, useWindowDimensions, View } from 'react-native';
 
 const generateDummyProfile = () => {
   return {
@@ -33,130 +42,254 @@ export default function HomeScreen() {
   const isMobile = width < 768;
   const dummyProfile = generateDummyProfile();
   const [selectedConversation, setSelectedConversation] = useState(null);
+  
+  // Side nav state
+  const sidebarTranslateX = useSharedValue(-width);
+  const [isSideNavOpen, setIsSideNavOpen] = useState(false);
+  const gestureActive = useSharedValue(false);
+
+  const openSideNav = () => {
+    sidebarTranslateX.value = withSpring(0, { 
+      damping: 20, 
+      stiffness: 200 
+    });
+    setIsSideNavOpen(true);
+  };
+
+  const closeSideNav = () => {
+    sidebarTranslateX.value = withSpring(-width, { 
+      damping: 20, 
+      stiffness: 200 
+    });
+    setIsSideNavOpen(false);
+  };
+
+  // DEBUG: Add console logs to see what's happening
+  React.useEffect(() => {
+    console.log('Sidebar X position:', sidebarTranslateX.value);
+    console.log('Is side nav open:', isSideNavOpen);
+  }, [isSideNavOpen]);
+
+  // Simple and direct real-time swipe gesture
+  const swipeGesture = Gesture.Pan()
+    .minDistance(5) // Minimum distance to activate
+    .onBegin((event) => {
+      console.log('Gesture began at X:', event.absoluteX);
+      // Always allow gesture to start, we'll filter in onUpdate
+      gestureActive.value = true;
+    })
+    .onUpdate((event) => {
+      if (!gestureActive.value) return;
+      
+      console.log('Gesture updating - translationX:', event.translationX, 'absoluteX:', event.absoluteX);
+      
+      // For opening: start from left edge
+      if (!isSideNavOpen && event.absoluteX < 50) {
+        // Convert translation to sidebar position
+        // Start from -width (fully closed) and move toward 0 (fully open)
+        const newX = -width + event.translationX;
+        sidebarTranslateX.value = Math.min(Math.max(newX, -width), 0);
+      }
+      // For closing: when sidebar is already open
+      else if (isSideNavOpen) {
+        // Start from 0 (fully open) and move toward -width (fully closed)
+        const newX = event.translationX; // This will be negative when swiping left
+        sidebarTranslateX.value = Math.max(Math.min(newX, 0), -width);
+      }
+    })
+    .onEnd((event) => {
+      console.log('Gesture ended - translationX:', event.translationX, 'velocityX:', event.velocityX);
+      
+      if (!gestureActive.value) return;
+      
+      const currentX = sidebarTranslateX.value;
+      const threshold = width * 0.3; // 30% threshold
+      const velocity = event.velocityX;
+      
+      let targetX;
+      
+      if (isSideNavOpen) {
+        // Closing logic
+        const shouldClose = currentX < -threshold || velocity < -300;
+        targetX = shouldClose ? -width : 0;
+        runOnJS(setIsSideNavOpen)(!shouldClose);
+      } else {
+        // Opening logic  
+        const shouldOpen = currentX > -width + threshold || velocity > 300;
+        targetX = shouldOpen ? 0 : -width;
+        runOnJS(setIsSideNavOpen)(shouldOpen);
+      }
+      
+      sidebarTranslateX.value = withSpring(targetX, { 
+        damping: 20, 
+        stiffness: 200 
+      });
+      
+      gestureActive.value = false;
+    })
+    .onFinalize(() => {
+      gestureActive.value = false;
+    });
+
+  // Sidebar animation style
+  const sidebarStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: sidebarTranslateX.value }],
+  }));
+
+  // Overlay animation - follows sidebar position
+  const overlayStyle = useAnimatedStyle(() => {
+    const progress = interpolate(
+      sidebarTranslateX.value,
+      [-width, 0],
+      [0, 0.6],
+      Extrapolate.CLAMP
+    );
+    
+    return {
+      opacity: progress,
+      display: progress > 0 ? 'flex' : 'none',
+    };
+  });
 
   return (
-    <View className='w-full flex-1 bg-zinc-900'>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: '#18181b' }}>
+        
+        {/* Main Content - Always stays in place */}
+        <View style={{ flex: 1 }}>
+          {/* Header */}
+          <View style={styles.header}>
+            {isMobile && (
+              <TouchableOpacity onPress={openSideNav} style={styles.menuButton}>
+                <Menu color="white" size={24} />
+              </TouchableOpacity>
+            )}
+            <Image 
+              source={require('@/assets/images/app-logos/handypal-high-resolution-logo-png-dark-mode.png')} 
+              style={styles.logo} 
+            />
+          </View>
 
-      <View className="w-full my-2 p-2">
-        <Image source={require('@/assets/images/app-logos/handypal-high-resolution-logo-png-dark-mode.png')} style={{width: 175, height: 50, margin: 10}} />
-      </View>
-      <View className="flex-1 " style={styles.mainContainer}>
-        {isWeb && !isMobile ? (
-          <View className="flex-row w-full justify-center">
-            <View className="w-1/4" style={styles.widthTwentyFive}><UserSideNav 
+          {/* Content Area with Swipe Detection - Make sure this covers the entire screen */}
+          <GestureDetector gesture={swipeGesture}>
+            <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+              {isWeb && !isMobile ? (
+                // Desktop Layout
+                <View style={styles.desktopContainer}>
+                  <View style={styles.widthTwenty}>
+                    <UserSideNav 
+                      avatarColor="bg-blue-500"
+                      name={dummyProfile.name}
+                      handle="handyman"
+                    />
+                  </View>
+                  <View style={[styles.widthFiftyFive, styles.bordered]}>
+                    <Jobs />
+                  </View>
+                  <View style={styles.widthTwentyFive}>
+                    {selectedConversation ? (
+                      <ChatPage conversation={selectedConversation} onBack={() => setSelectedConversation(null)} />
+                    ) : (
+                      <InboxPage onSelectConversation={setSelectedConversation} />
+                    )}
+                  </View>
+                </View>
+              ) : (
+                // Mobile Layout - MarketPlace
+                <View style={{ flex: 1 }}>
+                  <MarketPlace />
+                </View>
+              )}
+            </View>
+          </GestureDetector>
+        </View>
+
+        {/* Side Navigation - Slides OVER the content */}
+        {isMobile && (
+          <Animated.View style={[styles.sideNav, sidebarStyle]}>
+            <UserSideNav
               avatarColor="bg-blue-500"
               name={dummyProfile.name}
               handle="handyman"
-              /* bio={dummyProfile.bio}
-              location={dummyProfile.location}
-              skills={dummyProfile.skills}
-              followers={42}
-              following={24}
-              posts={15}
-              joinDate="Jan 2023"
-              status="Available"
-              rate="$50/hr"
-              availability="Weekdays" */
-            /></View>
-            <View className="w-2/4 border-solid border-l border-r border-zinc-700 border-b-0 border-t-0" style={[styles.widthFifty, {borderLeftWidth: 1, borderRightWidth: 1}]}><Jobs /></View>
-            <View className="w-1/4" style={styles.widthTwentyFive}>
-              {selectedConversation ? (
-                <ChatPage conversation={selectedConversation} onBack={() => setSelectedConversation(null)} />
-              ) : (
-                <InboxPage onSelectConversation={setSelectedConversation} />
-              )}
-            </View>
-          </View>
-        ) : (
-          <View className="w-full">
-            <MarketPlace />
-          </View>
+            />
+          </Animated.View>
         )}
 
-        
+        {/* Overlay - Darkens based on sidebar position */}
+        {isMobile && (
+          <Animated.View style={[styles.overlay, overlayStyle]}>
+            <TouchableOpacity 
+              style={{ flex: 1 }} 
+              onPress={closeSideNav}
+              activeOpacity={1}
+            />
+          </Animated.View>
+        )}
       </View>
-    </View>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
+  header: {
     flexDirection: 'row',
-    justifyContent: 'center'
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#18181b',
+    borderBottomWidth: 1,
+    borderBottomColor: '#3f3f46',
+  },
+  menuButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  logo: {
+    width: 175,
+    height: 50,
+  },
+  desktopContainer: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  widthTwenty: {
+    width: '20%',
+  },
+  widthFiftyFive: {
+    width: '55%',
   },
   widthTwentyFive: {
     width: '25%',
   },
-  widthFifty: {
-    width: '50%',
-  }
-});
-
-
-/* export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
-}
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  bordered: {
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: '#3f3f46',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
+  sideNav: {
+    position: 'absolute',
+    top: 0,
     bottom: 0,
     left: 0,
-    position: 'absolute',
+    width: '85%',
+    backgroundColor: '#18181b',
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 2,
+      height: 0,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    elevation: 10,
   },
-}); */
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'black',
+    zIndex: 999,
+  },
+});

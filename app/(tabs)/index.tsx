@@ -1,28 +1,27 @@
-import { Platform, StyleSheet } from 'react-native';
-import React, { useRef, useState } from 'react';
-import { 
-  Gesture, 
-  GestureDetector, 
-  GestureHandlerRootView, 
-  ScrollView
-} from 'react-native-gesture-handler';
-import Animated, { 
-  useAnimatedStyle, 
-  useSharedValue, 
-  withSpring, 
-  runOnJS,
-  interpolate,
-  Extrapolate
-} from 'react-native-reanimated';
-import { Image, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Menu } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { Image, Platform, StyleSheet, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView
+} from 'react-native-gesture-handler';
+import Animated, {
+  Extrapolate,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring
+} from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import "../../global.css";
 import ChatPage from '@/components/ChatPage';
 import InboxPage from '@/components/InboxPage';
 import Jobs from '@/components/Jobs';
 import MarketPlace from '@/components/MarketPlace';
 import UserSideNav from '@/components/userSideNav';
+import "../../global.css";
 
 const generateDummyProfile = () => {
   return {
@@ -64,79 +63,55 @@ export default function HomeScreen() {
     setIsSideNavOpen(false);
   };
 
-  // DEBUG: Add console logs to see what's happening
-  React.useEffect(() => {
-    console.log('Sidebar X position:', sidebarTranslateX.value);
-    console.log('Is side nav open:', isSideNavOpen);
-  }, [isSideNavOpen]);
-
-  // Simple and direct real-time swipe gesture
+  // Swipe gesture for side nav
   const swipeGesture = Gesture.Pan()
-    .minDistance(5) // Minimum distance to activate
-    .onBegin((event) => {
-      console.log('Gesture began at X:', event.absoluteX);
-      // Always allow gesture to start, we'll filter in onUpdate
+    .minDistance(5)
+    .onBegin(() => {
       gestureActive.value = true;
     })
     .onUpdate((event) => {
       if (!gestureActive.value) return;
-      
-      console.log('Gesture updating - translationX:', event.translationX, 'absoluteX:', event.absoluteX);
-      
-      // For opening: start from left edge
       if (!isSideNavOpen && event.absoluteX < 50) {
-        // Convert translation to sidebar position
-        // Start from -width (fully closed) and move toward 0 (fully open)
         const newX = -width + event.translationX;
         sidebarTranslateX.value = Math.min(Math.max(newX, -width), 0);
-      }
-      // For closing: when sidebar is already open
-      else if (isSideNavOpen) {
-        // Start from 0 (fully open) and move toward -width (fully closed)
-        const newX = event.translationX; // This will be negative when swiping left
+      } else if (isSideNavOpen) {
+        const newX = event.translationX;
         sidebarTranslateX.value = Math.max(Math.min(newX, 0), -width);
       }
     })
     .onEnd((event) => {
-      console.log('Gesture ended - translationX:', event.translationX, 'velocityX:', event.velocityX);
-      
       if (!gestureActive.value) return;
-      
+
       const currentX = sidebarTranslateX.value;
-      const threshold = width * 0.3; // 30% threshold
+      const threshold = width * 0.3;
       const velocity = event.velocityX;
-      
+
       let targetX;
-      
+
       if (isSideNavOpen) {
-        // Closing logic
         const shouldClose = currentX < -threshold || velocity < -300;
         targetX = shouldClose ? -width : 0;
         runOnJS(setIsSideNavOpen)(!shouldClose);
       } else {
-        // Opening logic  
         const shouldOpen = currentX > -width + threshold || velocity > 300;
         targetX = shouldOpen ? 0 : -width;
         runOnJS(setIsSideNavOpen)(shouldOpen);
       }
-      
+
       sidebarTranslateX.value = withSpring(targetX, { 
         damping: 20, 
         stiffness: 200 
       });
-      
       gestureActive.value = false;
     })
     .onFinalize(() => {
       gestureActive.value = false;
     });
 
-  // Sidebar animation style
   const sidebarStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: sidebarTranslateX.value }],
   }));
 
-  // Overlay animation - follows sidebar position
   const overlayStyle = useAnimatedStyle(() => {
     const progress = interpolate(
       sidebarTranslateX.value,
@@ -144,7 +119,7 @@ export default function HomeScreen() {
       [0, 0.6],
       Extrapolate.CLAMP
     );
-    
+
     return {
       opacity: progress,
       display: progress > 0 ? 'flex' : 'none',
@@ -153,11 +128,10 @@ export default function HomeScreen() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={{ flex: 1, backgroundColor: '#18181b' }}>
-        
-        {/* Main Content - Always stays in place */}
-        <View style={{ flex: 1 }}>
-          {/* Header */}
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#18181b' }} edges={['top']}>
+        <View style={{ flex: 1, backgroundColor: '#18181b' }}>
+          
+          {/* ✅ Header inside SafeAreaView so it respects top inset */}
           <View style={styles.header}>
             {isMobile && (
               <TouchableOpacity onPress={openSideNav} style={styles.menuButton}>
@@ -167,10 +141,11 @@ export default function HomeScreen() {
             <Image 
               source={require('@/assets/images/app-logos/handypal-high-resolution-logo-png-dark-mode.png')} 
               style={styles.logo} 
+              resizeMode="contain"
             />
           </View>
 
-          {/* Content Area with Swipe Detection - Make sure this covers the entire screen */}
+          {/* Content with Swipe Detection */}
           <GestureDetector gesture={swipeGesture}>
             <View style={{ flex: 1, backgroundColor: 'transparent' }}>
               {isWeb && !isMobile ? (
@@ -195,37 +170,39 @@ export default function HomeScreen() {
                   </View>
                 </View>
               ) : (
-                // Mobile Layout - MarketPlace
+                // Mobile Layout
                 <View style={{ flex: 1 }}>
                   <MarketPlace />
                 </View>
               )}
             </View>
           </GestureDetector>
+
+          {/* Side Navigation */}
+          {isMobile && (
+            <Animated.View style={[styles.sideNav, sidebarStyle]}>
+              <SafeAreaView style={{ flex: 1 }}>
+                <UserSideNav
+                  avatarColor="bg-blue-500"
+                  name={dummyProfile.name}
+                  handle="handyman"
+                />
+              </SafeAreaView>
+            </Animated.View>
+          )}
+
+          {/* Overlay */}
+          {isMobile && (
+            <Animated.View style={[styles.overlay, overlayStyle]}>
+              <TouchableOpacity 
+                style={{ flex: 1 }} 
+                onPress={closeSideNav}
+                activeOpacity={1}
+              />
+            </Animated.View>
+          )}
         </View>
-
-        {/* Side Navigation - Slides OVER the content */}
-        {isMobile && (
-          <Animated.View style={[styles.sideNav, sidebarStyle]}>
-            <UserSideNav
-              avatarColor="bg-blue-500"
-              name={dummyProfile.name}
-              handle="handyman"
-            />
-          </Animated.View>
-        )}
-
-        {/* Overlay - Darkens based on sidebar position */}
-        {isMobile && (
-          <Animated.View style={[styles.overlay, overlayStyle]}>
-            <TouchableOpacity 
-              style={{ flex: 1 }} 
-              onPress={closeSideNav}
-              activeOpacity={1}
-            />
-          </Animated.View>
-        )}
-      </View>
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }

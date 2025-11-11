@@ -65,16 +65,23 @@ export default function HomeScreen() {
 
   // Swipe gesture for side nav
   const swipeGesture = Gesture.Pan()
-    .minDistance(5)
-    .onBegin(() => {
-      gestureActive.value = true;
+    .activeOffsetX([-10, 10]) // More lenient horizontal activation
+    .failOffsetY([-15, 15])   // Strict vertical failure
+    .onBegin((event) => {
+      // Only activate if the gesture starts on the left edge
+      if (event.absoluteX < 60) {
+        gestureActive.value = true;
+      }
     })
     .onUpdate((event) => {
       if (!gestureActive.value) return;
-      if (!isSideNavOpen && event.absoluteX < 50) {
+
+      if (!isSideNavOpen) {
+        // Opening from the left edge
         const newX = -width + event.translationX;
         sidebarTranslateX.value = Math.min(Math.max(newX, -width), 0);
-      } else if (isSideNavOpen) {
+      } else {
+        // Closing from anywhere
         const newX = event.translationX;
         sidebarTranslateX.value = Math.max(Math.min(newX, 0), -width);
       }

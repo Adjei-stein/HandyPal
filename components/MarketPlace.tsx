@@ -1,6 +1,7 @@
 import { Heart, Share2, ShoppingCart } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { FlatList, Image, Modal, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Modal, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 
 const products = [
   {

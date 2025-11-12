@@ -1,5 +1,5 @@
 import { BlurView } from 'expo-blur';
-import { BadgeCent, Bookmark, Calendar1, ChevronLeft, ChevronRight, Handshake, Lock, MapPin, X, ListFilter } from 'lucide-react-native';
+import { BadgeCent, Bookmark, Calendar1, ChevronLeft, ChevronRight, Handshake, ListFilter, Lock, MapPin, X } from 'lucide-react-native';
 import React, { useMemo, useRef, useState } from 'react';
 import {
   Animated,
@@ -85,20 +85,20 @@ type JobCardProps = {
 
 const JobCard: React.FC<JobCardProps> = ({ job, onImagePress }) => (
     <View className="bg-zinc-800 rounded-lg p-4 mb-4">
-        <TouchableOpacity className="absolute top-4 right-4 z-10">
-            <Bookmark size={24} color="white" />
-        </TouchableOpacity>
-        <View className="flex-row">
-            <TouchableOpacity onPress={() => onImagePress(job.images)} className="w-64 h-64">
+        <View className="flex-col md:flex-row">
+            <TouchableOpacity onPress={() => onImagePress(job.images)} className="w-full md:w-64 h-64 mb-4 md:mb-0">
             <Image
                 source={job.images[0]}
                 style={{ width: '100%', height: '100%', borderRadius: 8 }}
                 resizeMode="cover"
             />
             </TouchableOpacity>
-            <View className="flex-1 pl-4">
-            <View className='flex-row items-center py-1'>
+            <View className="flex-1 md:pl-4">
+            <View className='flex-row items-center justify-between py-1'>
                 <Text className="text-white text-xl font-bold">{job.title}</Text>
+                <TouchableOpacity>
+                    <Bookmark size={24} color="white" />
+                </TouchableOpacity>
             </View>
             
             <View className="flex-row items-center py-1">

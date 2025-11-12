@@ -89,26 +89,16 @@ export default function HomeScreen() {
     .onEnd((event) => {
       if (!gestureActive.value) return;
 
-      const currentX = sidebarTranslateX.value;
-      const threshold = width * 0.3;
-      const velocity = event.velocityX;
+      // Simplified logic based on position threshold
+      const shouldOpen = sidebarTranslateX.value > -width * 0.4;
+      const targetX = shouldOpen ? 0 : -width;
 
-      let targetX;
-
-      if (isSideNavOpen) {
-        const shouldClose = currentX < -threshold || velocity < -300;
-        targetX = shouldClose ? -width : 0;
-        runOnJS(setIsSideNavOpen)(!shouldClose);
-      } else {
-        const shouldOpen = currentX > -width + threshold || velocity > 300;
-        targetX = shouldOpen ? 0 : -width;
-        runOnJS(setIsSideNavOpen)(shouldOpen);
-      }
-
-      sidebarTranslateX.value = withSpring(targetX, { 
-        damping: 20, 
-        stiffness: 200 
+      sidebarTranslateX.value = withSpring(targetX, {
+        damping: 20,
+        stiffness: 200,
       });
+      runOnJS(setIsSideNavOpen)(shouldOpen);
+
       gestureActive.value = false;
     })
     .onFinalize(() => {
@@ -138,7 +128,6 @@ export default function HomeScreen() {
       <SafeAreaView style={{ flex: 1, backgroundColor: '#18181b' }} edges={['top']}>
         <View style={{ flex: 1, backgroundColor: '#18181b' }}>
           
-          {/* ✅ Header inside SafeAreaView so it respects top inset */}
           <View style={styles.header}>
             {isMobile && (
               <TouchableOpacity onPress={openSideNav} style={styles.menuButton}>
@@ -179,7 +168,7 @@ export default function HomeScreen() {
               ) : (
                 // Mobile Layout
                 <View style={{ flex: 1 }}>
-                  <MarketPlace />
+                  <Jobs />
                 </View>
               )}
             </View>
@@ -255,7 +244,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     left: 0,
-    width: '85%',
+    width: '75%',
     backgroundColor: '#18181b',
     zIndex: 1000,
     shadowColor: '#000',

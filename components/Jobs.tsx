@@ -162,6 +162,9 @@ const Jobs = () => {
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
+  const [activeFilter, setActiveFilter] = useState('All');
+  const filtersList = ['All', 'Physical', 'Digital', 'Min GH₵10', 'Max GH₵100', 'Today'];
+
   const thumbHeight =
     listHeight > 0 && contentHeight > listHeight
       ? Math.max((listHeight / contentHeight) * listHeight, MIN_THUMB_HEIGHT)
@@ -198,6 +201,42 @@ const Jobs = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#18181b' }}>
+      <View style={styles.headerContainer}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={{ fontSize: 32, fontWeight: 'bold', color: 'white' }}>Jobs</Text>
+          <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#27272a', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20 }}>
+            <ListFilter size={18} color="white" />
+            <Text style={{ color: 'white', marginLeft: 8 }}>Filters</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ marginTop: 16 }}>
+          <FlatList
+            data={filtersList}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: activeFilter === item ? '#3b82f6' : '#27272a',
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  borderRadius: 20,
+                  marginRight: 8,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 1.41,
+                  elevation: 2,
+                }}
+                onPress={() => setActiveFilter(item)}
+              >
+                <Text style={{ color: 'white', fontWeight: '600' }}>{item}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      </View>
 
       <View style={{ flex: 1 }}>
         <FlatList

@@ -125,7 +125,6 @@ export default function HomeScreen() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#18181b' }} edges={['top']}>
         <View style={{ flex: 1, backgroundColor: '#18181b' }}>
           
           <View style={styles.header}>
@@ -198,7 +197,6 @@ export default function HomeScreen() {
             </Animated.View>
           )}
         </View>
-      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }

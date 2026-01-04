@@ -1,4 +1,5 @@
 import { BlurView } from 'expo-blur';
+import { Link } from 'expo-router';
 import { BadgeCent, Bookmark, Calendar1, ChevronLeft, ChevronRight, Handshake, ListFilter, Lock, MapPin, X } from 'lucide-react-native';
 import React, { useMemo, useRef, useState } from 'react';
 import {
@@ -138,9 +139,11 @@ const JobCard: React.FC<JobCardProps> = ({ job, onImagePress }) => (
             <Text className="text-gray-300 my-2">{job.description}</Text>
             <View className="border-t border-gray-700 my-2" />
             <View className="flex-row justify-end">
-                <TouchableOpacity className="bg-blue-500 rounded-full py-2 px-4">
-                <Text className="text-white font-bold text-sm">View Job</Text>
-                </TouchableOpacity>
+                <Link href="/JobDetails" asChild>
+                    <TouchableOpacity className="bg-blue-500 rounded-full py-2 px-4">
+                        <Text className="text-white font-bold text-sm">View Job</Text>
+                    </TouchableOpacity>
+                </Link>
             </View>
             </View>
         </View>

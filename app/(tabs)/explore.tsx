@@ -1,110 +1,122 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import ListingCard from '@/components/listings/ListingCard';
+import { palette } from '@/constants/theme';
+import { useListings } from '@/context/ListingsContext';
+import { KIND_LABEL } from '@/lib/format';
+import { Listing, ListingKind } from '@/types/listing';
+import { useLocalSearchParams } from 'expo-router';
+import { Search, SearchX, X } from 'lucide-react-native';
+import { useMemo, useState } from 'react';
+import { FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+type Filter = 'all' | 'saved' | ListingKind;
 
-export default function TabTwoScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
-  );
+const FILTERS: Filter[] = ['all', 'saved', 'task', 'contract', 'fulltime', 'product', 'service'];
+const FILTER_LABEL: Record<Filter, string> = { all: 'All', saved: 'Saved', ...KIND_LABEL };
+
+function searchableText(listing: Listing): string {
+  const parts = [
+    listing.title,
+    listing.description,
+    listing.location.area,
+    listing.location.city,
+    listing.postedBy.name,
+    KIND_LABEL[listing.kind],
+    ...listing.tags,
+  ];
+  if (listing.kind === 'fulltime') parts.push(listing.details.company);
+  return parts.filter(Boolean).join(' ').toLowerCase();
 }
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
+export default function ExploreScreen() {
+  const params = useLocalSearchParams<{ saved?: string }>();
+  const { listings, bookmarks } = useListings();
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<Filter>(params.saved ? 'saved' : 'all');
+
+  // Opening Explore from the drawer's "Saved" link switches to that filter.
+  const [prevSaved, setPrevSaved] = useState(params.saved);
+  if (params.saved !== prevSaved) {
+    setPrevSaved(params.saved);
+    if (params.saved) setFilter('saved');
+  }
+
+  const results = useMemo(() => {
+    // Every word must appear somewhere, so "plumber adenta" narrows instead of widening.
+    const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+    return listings.filter(l => {
+      if (filter === 'saved' && !bookmarks.has(l.id)) return false;
+      if (filter !== 'all' && filter !== 'saved' && l.kind !== filter) return false;
+      if (words.length === 0) return true;
+      const text = searchableText(l);
+      return words.every(w => text.includes(w));
+    });
+  }, [listings, bookmarks, query, filter]);
+
+  return (
+    <View className="flex-1 bg-zinc-900">
+      <View className="px-4 pt-3">
+        <Text className="text-white text-3xl font-bold mb-3">Explore</Text>
+        <View className="flex-row items-center bg-zinc-800 rounded-full px-4">
+          <Search size={18} color={palette.textMuted} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Search jobs, products, services, places…"
+            placeholderTextColor={palette.textSubtle}
+            className="flex-1 text-white text-base py-3 ml-2"
+            returnKeyType="search"
+            autoCorrect={false}
+          />
+          {query.length > 0 && (
+            <TouchableOpacity onPress={() => setQuery('')} accessibilityLabel="Clear search" hitSlop={10}>
+              <X size={18} color={palette.textMuted} />
+            </TouchableOpacity>
+          )}
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-3 mb-1">
+          {FILTERS.map(f => {
+            const active = filter === f;
+            return (
+              <TouchableOpacity
+                key={f}
+                onPress={() => setFilter(f)}
+                className={`px-4 py-2 rounded-full mr-2 ${active ? 'bg-white' : 'bg-zinc-800'}`}
+              >
+                <Text className={`font-semibold ${active ? 'text-zinc-900' : 'text-white'}`}>
+                  {FILTER_LABEL[f]}
+                  {f === 'saved' && bookmarks.size > 0 ? ` (${bookmarks.size})` : ''}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+
+      <FlatList
+        data={results}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => <ListingCard listing={item} />}
+        contentContainerStyle={{ padding: 16, paddingTop: 8 }}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={
+          <Text className="text-zinc-500 text-sm mb-2">
+            {results.length} result{results.length === 1 ? '' : 's'}
+          </Text>
+        }
+        ListEmptyComponent={
+          <View className="items-center py-16 px-8">
+            <SearchX size={40} color={palette.textSubtle} />
+            <Text className="text-white text-lg font-bold mt-3">
+              {filter === 'saved' ? 'Nothing saved yet' : 'No matches'}
+            </Text>
+            <Text className="text-zinc-400 text-center mt-1">
+              {filter === 'saved'
+                ? 'Tap the bookmark on any listing to keep it here.'
+                : 'Try fewer words or a different category.'}
+            </Text>
+          </View>
+        }
+      />
+    </View>
+  );
+}

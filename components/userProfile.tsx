@@ -1,139 +1,114 @@
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import ListingCard from '@/components/listings/ListingCard';
+import { Avatar } from '@/components/listings/shared';
+import { palette } from '@/constants/theme';
+import { formatDate, formatPlace } from '@/lib/format';
+import { Listing, Place, UserSummary } from '@/types/listing';
+import { BadgeCheck, MapPin, Share2, Star } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { FlatList, Share, Text, TouchableOpacity, View } from 'react-native';
+
+type ProfileUser = UserSummary & {
+  bio?: string;
+  location?: Place;
+  joinedAt?: string;
+  completedJobs?: number;
+};
 
 interface UserProfileProps {
-  avatarColor: string;
-  name: string;
-  handle: string;
-  bio: string;
-  location: string;
-  website?: string;
-  followers: number;
-  following: number;
-  posts: number;
-  joinDate: string;
-  skills: string[];
-  status: string;
-  rate: string;
-  availability: string;
+  user: ProfileUser;
+  listings: Listing[];
 }
 
-export default function UserProfile({
-  avatarColor,
-  name,
-  handle,
-  bio,
-  location,
-  website,
-  followers,
-  following,
-  posts,
-  joinDate,
-  skills,
-  status,
-  rate,
-  availability,
-}: UserProfileProps) {
-  const navigation = useNavigation();
+type Tab = 'selling' | 'hiring' | 'reviews';
+const TAB_LABEL: Record<Tab, string> = { selling: 'Products & services', hiring: 'Jobs posted', reviews: 'Reviews' };
 
+function Stat({ value, label }: { value: string; label: string }) {
   return (
-    <View className="px-4 py-3">
-      {/* Profile Header */}
-      <View className="flex-row items-start mb-4">
-        <View className={`w-20 h-20 rounded-full ${avatarColor} mr-4`} />
-        
-          <View className="flex-1">
-            <View>
-              <Text className="font-bold text-white text-xl">{name}</Text>
-              <Text className="text-gray-500 mb-2">@{handle}</Text>
-              <View className="flex-row space-x-2">
-                <TouchableOpacity className="bg-blue-500 px-4 py-2 rounded-full">
-                  <Text className="text-white font-bold">Follow</Text>
-                </TouchableOpacity>
-                {/* <TouchableOpacity className="border border-gray-500 px-4 py-2 rounded-full">
-                  <Text className="text-white font-bold">Message</Text>
-                </TouchableOpacity> */}
-            </View>
-          </View>
-        </View>
-      </View>
+    <View className="flex-1 items-center bg-zinc-800 rounded-xl py-3 mx-1">
+      <Text className="text-white text-lg font-bold">{value}</Text>
+      <Text className="text-zinc-400 text-xs mt-0.5">{label}</Text>
+    </View>
+  );
+}
 
-      {/* Bio */}
-      <Text className="text-white mb-3">{bio}</Text>
+/** Storefront-style profile: who they are, why to trust them, and what they offer. */
+export default function UserProfile({ user, listings }: UserProfileProps) {
+  const [tab, setTab] = useState<Tab>('selling');
 
-      {/* Location & Website */}
-      <View className="flex-row items-center space-x-4 mb-3">
-        <View className="flex-row items-center">
+  const selling = listings.filter(l => l.kind === 'product' || l.kind === 'service');
+  const hiring = listings.filter(l => l.kind === 'task' || l.kind === 'contract' || l.kind === 'fulltime');
+  const shown: Listing[] = tab === 'selling' ? selling : tab === 'hiring' ? hiring : [];
+
+  const header = (
+    <View>
+      <View className="flex-row items-center">
+        <Avatar user={user} size={72} />
+        <View className="ml-4 flex-1">
           <View className="flex-row items-center">
-            <Icon name="location-pin" size={12} color="red" />
-            <Text className="text-gray-400 ml-1">{location}</Text>
+            <Text className="text-white text-2xl font-bold flex-shrink" numberOfLines={1}>
+              {user.name}
+            </Text>
+            {user.verified && <BadgeCheck size={20} color={palette.verified} style={{ marginLeft: 6 }} />}
           </View>
+          <Text className="text-zinc-500">@{user.handle}</Text>
+          {user.location && (
+            <View className="flex-row items-center mt-1">
+              <MapPin size={13} color={palette.textMuted} />
+              <Text className="text-zinc-400 text-sm ml-1">{formatPlace(user.location)}</Text>
+            </View>
+          )}
         </View>
-        {website && (
-          <TouchableOpacity>
-            <Text className="text-blue-400">{website}</Text>
+        <TouchableOpacity
+          onPress={() => Share.share({ message: `Check out ${user.name} (@${user.handle}) on HandyPal` })}
+          accessibilityLabel="Share profile"
+          className="p-2.5 bg-zinc-800 rounded-full"
+        >
+          <Share2 size={20} color="white" />
+        </TouchableOpacity>
+      </View>
+
+      {user.bio && <Text className="text-zinc-200 text-base mt-4">{user.bio}</Text>}
+
+      <View className="flex-row mt-4 -mx-1">
+        <Stat
+          value={user.rating !== undefined ? `★ ${user.rating.toFixed(1)}` : '—'}
+          label={`${user.reviewCount ?? 0} reviews`}
+        />
+        <Stat value={String(user.completedJobs ?? 0)} label="Jobs done" />
+        <Stat value={String(listings.length)} label="Listings" />
+      </View>
+      {user.joinedAt && <Text className="text-zinc-500 text-xs mt-3">Member since {formatDate(user.joinedAt)}</Text>}
+
+      <View className="flex-row border-b border-zinc-800 mt-4 mb-3">
+        {(Object.keys(TAB_LABEL) as Tab[]).map(t => (
+          <TouchableOpacity
+            key={t}
+            onPress={() => setTab(t)}
+            className={`flex-1 items-center pb-3 border-b-2 ${tab === t ? 'border-blue-500' : 'border-transparent'}`}
+          >
+            <Text className={`text-sm font-semibold ${tab === t ? 'text-white' : 'text-zinc-500'}`}>{TAB_LABEL[t]}</Text>
           </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Stats */}
-      <View className="flex-row space-x-4 mb-4">
-        <TouchableOpacity>
-          <Text className="text-white font-bold">{followers} <Text className="text-gray-400 font-normal">Followers</Text></Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text className="text-white font-bold">{following} <Text className="text-gray-400 font-normal">Following</Text></Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text className="text-white font-bold">{posts} <Text className="text-gray-400 font-normal">Posts</Text></Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Join Date */}
-      <Text className="text-gray-400 text-sm mb-4">Joined {joinDate}</Text>
-
-      {/* Status & Pricing */}
-      <View className="flex-row items-center space-x-2 mb-4">
-        <View className="bg-gray-700 rounded-full px-2 py-0.5">
-          <Text className="text-gray-200 text-xs font-semibold">{status}</Text>
-        </View>
-        <View className="bg-white/10 rounded-full px-2 py-0.5">
-          <Text className="text-white text-xs font-semibold"><Icon name="dollar-sign" size={12} color="white" /> {rate}</Text>
-        </View>
-        <View className="bg-white/10 rounded-full px-2 py-0.5">
-          <Text className="text-white text-xs font-semibold">⏳ {availability}</Text>
-        </View>
-      </View>
-
-      {/* Skills */}
-      <View className="flex-row flex-wrap gap-2 mb-4">
-        {skills.map((skill, index) => (
-          <View key={index} className="bg-blue-900/30 rounded-full px-3 py-1">
-            <Text className="text-blue-400 text-sm">{skill}</Text>
-          </View>
         ))}
       </View>
-
-      {/* Divider */}
-      <View className="border-b border-zinc-700 my-2" />
-
-      {/* Navigation */}
-      <View className="flex-row justify-around pt-2">
-        <TouchableOpacity>
-          <Text className="text-white font-bold">Posts</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text className="text-gray-400">Opportunities</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text className="text-gray-400">Sales</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text className="text-gray-400">Messages</Text>
-        </TouchableOpacity>
-      </View>
     </View>
+  );
+
+  return (
+    <FlatList
+      className="bg-zinc-900"
+      data={shown}
+      keyExtractor={item => item.id}
+      renderItem={({ item }) => <ListingCard listing={item} />}
+      ListHeaderComponent={header}
+      contentContainerStyle={{ padding: 16 }}
+      ListEmptyComponent={
+        <View className="items-center py-10">
+          <Star size={32} color={palette.textSubtle} />
+          <Text className="text-zinc-400 mt-2">
+            {tab === 'reviews' ? 'No reviews yet' : 'Nothing posted here yet'}
+          </Text>
+        </View>
+      }
+    />
   );
 }

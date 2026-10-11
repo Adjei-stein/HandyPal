@@ -1,6 +1,6 @@
 import { Menu } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Image, Platform, StyleSheet, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { BackHandler, Image, Platform, StyleSheet, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import {
   Gesture,
   GestureDetector,
@@ -14,33 +14,21 @@ import Animated, {
   useSharedValue,
   withSpring
 } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import ChatPage from '@/components/ChatPage';
+import ChatPage, { Conversation } from '@/components/ChatPage';
+import HomeFeed from '@/components/HomeFeed';
 import InboxPage from '@/components/InboxPage';
-import Jobs from '@/components/Jobs';
-import MarketPlace from '@/components/MarketPlace';
 import UserSideNav from '@/components/userSideNav';
-import "../../global.css";
-
-const generateDummyProfile = () => {
-  return {
-    name: 'John Doe',
-    bio: 'Handyman with 5 years of experience',
-    location: 'New York, NY',
-    skills: ['Plumbing', 'Electrical', 'Carpentry'],
-    rating: 4.8,
-    completedJobs: 42,
-    profileImage: require('@/assets/images/adaptive-icon.png')
-  };
-};
+import { currentUser } from '@/data/mockData';
+import { useLocalSearchParams } from 'expo-router';
 
 export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const isWeb = Platform.OS === 'web';
   const isMobile = width < 768;
-  const dummyProfile = generateDummyProfile();
-  const [selectedConversation, setSelectedConversation] = useState(null);
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const initialGroup = mode === 'market' ? 'market' : 'work';
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   
   // Side nav state
   const sidebarTranslateX = useSharedValue(-width);
@@ -48,20 +36,30 @@ export default function HomeScreen() {
   const gestureActive = useSharedValue(false);
 
   const openSideNav = () => {
-    sidebarTranslateX.value = withSpring(0, { 
+    sidebarTranslateX.set(withSpring(0, { 
       damping: 20, 
       stiffness: 200 
-    });
+    }));
     setIsSideNavOpen(true);
   };
 
   const closeSideNav = () => {
-    sidebarTranslateX.value = withSpring(-width, { 
+    sidebarTranslateX.set(withSpring(-width, { 
       damping: 20, 
       stiffness: 200 
-    });
+    }));
     setIsSideNavOpen(false);
   };
+
+  // Android back button closes the drawer before leaving the screen.
+  useEffect(() => {
+    if (!isSideNavOpen) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      closeSideNav();
+      return true;
+    });
+    return () => sub.remove();
+  });
 
   // Swipe gesture for side nav
   const swipeGesture = Gesture.Pan()
@@ -70,48 +68,48 @@ export default function HomeScreen() {
     .onBegin((event) => {
       // Only activate if the gesture starts on the left edge
       if (event.absoluteX < 60) {
-        gestureActive.value = true;
+        gestureActive.set(true);
       }
     })
     .onUpdate((event) => {
-      if (!gestureActive.value) return;
+      if (!gestureActive.get()) return;
 
       if (!isSideNavOpen) {
         // Opening from the left edge
         const newX = -width + event.translationX;
-        sidebarTranslateX.value = Math.min(Math.max(newX, -width), 0);
+        sidebarTranslateX.set(Math.min(Math.max(newX, -width), 0));
       } else {
         // Closing from anywhere
         const newX = event.translationX;
-        sidebarTranslateX.value = Math.max(Math.min(newX, 0), -width);
+        sidebarTranslateX.set(Math.max(Math.min(newX, 0), -width));
       }
     })
     .onEnd((event) => {
-      if (!gestureActive.value) return;
+      if (!gestureActive.get()) return;
 
       // Simplified logic based on position threshold
-      const shouldOpen = sidebarTranslateX.value > -width * 0.4;
+      const shouldOpen = sidebarTranslateX.get() > -width * 0.4;
       const targetX = shouldOpen ? 0 : -width;
 
-      sidebarTranslateX.value = withSpring(targetX, {
+      sidebarTranslateX.set(withSpring(targetX, {
         damping: 20,
         stiffness: 200,
-      });
+      }));
       runOnJS(setIsSideNavOpen)(shouldOpen);
 
-      gestureActive.value = false;
+      gestureActive.set(false);
     })
     .onFinalize(() => {
-      gestureActive.value = false;
+      gestureActive.set(false);
     });
 
   const sidebarStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: sidebarTranslateX.value }],
+    transform: [{ translateX: sidebarTranslateX.get() }],
   }));
 
   const overlayStyle = useAnimatedStyle(() => {
     const progress = interpolate(
-      sidebarTranslateX.value,
+      sidebarTranslateX.get(),
       [-width, 0],
       [0, 0.6],
       Extrapolate.CLAMP
@@ -129,7 +127,7 @@ export default function HomeScreen() {
           
           <View style={styles.header}>
             {isMobile && (
-              <TouchableOpacity onPress={openSideNav} style={styles.menuButton}>
+              <TouchableOpacity onPress={openSideNav} style={styles.menuButton} accessibilityLabel="Open menu">
                 <Menu color="white" size={24} />
               </TouchableOpacity>
             )}
@@ -147,14 +145,10 @@ export default function HomeScreen() {
                 // Desktop Layout
                 <View style={styles.desktopContainer}>
                   <View style={styles.widthTwenty}>
-                    <UserSideNav 
-                      avatarColor="bg-blue-500"
-                      name={dummyProfile.name}
-                      handle="handyman"
-                    />
+                    <UserSideNav user={currentUser} />
                   </View>
                   <View style={[styles.widthFiftyFive, styles.bordered]}>
-                    <Jobs />
+                    <HomeFeed key={initialGroup} initialGroup={initialGroup} />
                   </View>
                   <View style={styles.widthTwentyFive}>
                     {selectedConversation ? (
@@ -167,7 +161,7 @@ export default function HomeScreen() {
               ) : (
                 // Mobile Layout
                 <View style={{ flex: 1 }}>
-                  <Jobs />
+                  <HomeFeed key={initialGroup} initialGroup={initialGroup} />
                 </View>
               )}
             </View>
@@ -176,13 +170,7 @@ export default function HomeScreen() {
           {/* Side Navigation */}
           {isMobile && (
             <Animated.View style={[styles.sideNav, sidebarStyle]}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <UserSideNav
-                  avatarColor="bg-blue-500"
-                  name={dummyProfile.name}
-                  handle="handyman"
-                />
-              </SafeAreaView>
+              <UserSideNav user={currentUser} onNavigate={closeSideNav} onClose={closeSideNav} />
             </Animated.View>
           )}
 
@@ -242,8 +230,12 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     left: 0,
-    width: '75%',
+    width: '85%',
+    maxWidth: 340,
     backgroundColor: '#18181b',
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 20,
+    overflow: 'hidden',
     zIndex: 1000,
     shadowColor: '#000',
     shadowOffset: {

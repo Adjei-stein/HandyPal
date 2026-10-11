@@ -1,0 +1,245 @@
+import { Listing, UserSummary } from '@/types/listing';
+
+// Sample data until a backend is wired up. Timestamps are relative to app start
+// so the "posted x ago" labels stay realistic.
+const hoursAgo = (h: number) => new Date(Date.now() - h * 3600_000).toISOString();
+const hoursFromNow = (h: number) => new Date(Date.now() + h * 3600_000).toISOString();
+
+export const currentUser: UserSummary & {
+  bio: string;
+  location: Listing['location'];
+  defaultCurrency: string;
+  joinedAt: string;
+  completedJobs: number;
+} = {
+  id: 'u-me',
+  name: 'Kwame Mensah',
+  handle: 'kwamefixes',
+  verified: true,
+  rating: 4.8,
+  reviewCount: 23,
+  bio: 'Electrician and general handyman. Quick, tidy work and fair prices.',
+  location: { area: 'Kasoa', city: 'Central Region', country: 'GH' },
+  defaultCurrency: 'GHS',
+  joinedAt: '2025-03-01T00:00:00.000Z',
+  completedJobs: 42,
+};
+
+const users = {
+  ama: {
+    id: 'u-ama',
+    name: 'Ama Owusu',
+    handle: 'amaowusu',
+    avatar: require('../assets/images/pexels-stevedoessteve-28010414.jpg'),
+    verified: true,
+    rating: 4.9,
+    reviewCount: 31,
+  },
+  kofi: {
+    id: 'u-kofi',
+    name: 'Kofi Asante',
+    handle: 'kofiasante',
+    avatar: require('../assets/images/pexels-stevedoessteve-31300186.jpg'),
+    verified: false,
+    rating: 4.5,
+    reviewCount: 8,
+  },
+  esi: {
+    id: 'u-esi',
+    name: 'Esi Boateng',
+    handle: 'esistyles',
+    avatar: require('../assets/images/pexels-stevedoessteve-31300188.jpg'),
+    verified: true,
+    rating: 4.8,
+    reviewCount: 55,
+  },
+  bright: {
+    id: 'u-bright',
+    name: 'Bright Plumbing Co.',
+    handle: 'brightplumbing',
+    verified: true,
+    rating: 4.9,
+    reviewCount: 102,
+  },
+  nimbus: {
+    id: 'u-nimbus',
+    name: 'Nimbus Logistics',
+    handle: 'nimbuslogistics',
+    verified: true,
+  },
+  me: {
+    id: currentUser.id,
+    name: currentUser.name,
+    handle: currentUser.handle,
+    verified: currentUser.verified,
+    rating: currentUser.rating,
+    reviewCount: currentUser.reviewCount,
+  },
+} satisfies Record<string, UserSummary>;
+
+export const mockListings: Listing[] = [
+  {
+    id: 'l-1',
+    kind: 'task',
+    title: 'Car wash and interior clean',
+    description:
+      'Looking for someone to wash my sedan inside and out. All supplies will be provided — just bring your hands and attention to detail.',
+    price: { amount: 50, currency: 'GHS', unit: 'fixed', negotiable: true },
+    location: { area: 'Kasoa', city: 'Central Region', country: 'GH' },
+    images: [
+      require('../assets/images/photo_2025-08-29_11-40-04.jpg'),
+      require('../assets/images/photo_2025-08-29_11-38-04.jpg'),
+    ],
+    tags: ['car wash', 'cleaning'],
+    postedBy: users.kofi,
+    createdAt: hoursAgo(0.3),
+    status: 'open',
+    details: {
+      scheduledFor: hoursFromNow(5),
+      duration: '1 hour',
+      workMode: 'onsite',
+      workersNeeded: 1,
+      toolsProvided: true,
+    },
+  },
+  {
+    id: 'l-2',
+    kind: 'task',
+    title: 'Morning dog walker',
+    description: 'Need a reliable person to walk my dog every weekday morning before 8am.',
+    price: { amount: 25, currency: 'GHS', unit: 'day', negotiable: false },
+    location: { area: 'East Legon', city: 'Accra', country: 'GH' },
+    images: [require('../assets/images/photo_2025-08-29_11-38-09.jpg')],
+    tags: ['pets', 'recurring'],
+    postedBy: users.ama,
+    createdAt: hoursAgo(3),
+    status: 'open',
+    details: { duration: '30 minutes', workMode: 'onsite', workersNeeded: 1 },
+  },
+  {
+    id: 'l-3',
+    kind: 'task',
+    title: 'Deep clean before move-out',
+    description: 'Deep cleaning for a 2-bedroom apartment before handing back the keys.',
+    price: { amount: 150, currency: 'GHS', unit: 'fixed', negotiable: true },
+    location: { area: 'Adenta', city: 'Accra', country: 'GH' },
+    images: [
+      require('../assets/images/photo_2025-08-29_11-38-12.jpg'),
+      require('../assets/images/photo_2025-08-29_11-38-15.jpg'),
+    ],
+    tags: ['cleaning', 'home'],
+    postedBy: users.ama,
+    createdAt: hoursAgo(20),
+    status: 'open',
+    details: {
+      scheduledFor: hoursFromNow(48),
+      duration: '4 hours',
+      workMode: 'onsite',
+      workersNeeded: 2,
+      toolsProvided: false,
+    },
+  },
+  {
+    id: 'l-4',
+    kind: 'contract',
+    title: 'Mobile app UI designer (3 months)',
+    description:
+      'We need a designer to redesign our customer app. Fully remote, async-friendly team.',
+    price: { amount: 1500, currency: 'USD', unit: 'month', negotiable: true },
+    location: { area: 'Remote', country: 'GH' },
+    images: [],
+    tags: ['design', 'figma', 'remote'],
+    postedBy: users.nimbus,
+    createdAt: hoursAgo(30),
+    status: 'open',
+    details: {
+      duration: '3 months',
+      workMode: 'remote',
+      deliverables: ['User research summary', 'Figma design system', 'High-fidelity screens'],
+    },
+  },
+  {
+    id: 'l-5',
+    kind: 'fulltime',
+    title: 'Dispatch rider',
+    description:
+      'Join our delivery team. Company motorbike and fuel provided. Valid licence required.',
+    price: { amount: 2500, maxAmount: 3200, currency: 'GHS', unit: 'month', negotiable: false },
+    location: { area: 'Osu', city: 'Accra', country: 'GH' },
+    images: [],
+    tags: ['delivery', 'driving'],
+    postedBy: users.nimbus,
+    createdAt: hoursAgo(50),
+    status: 'open',
+    details: {
+      company: 'Nimbus Logistics',
+      workMode: 'onsite',
+      requirements: ['Valid motorbike licence', '1+ year riding experience', 'Smartphone'],
+      deadline: hoursFromNow(24 * 14),
+    },
+  },
+  {
+    id: 'l-6',
+    kind: 'product',
+    title: 'Vintage leather jacket',
+    description: 'A stylish vintage leather jacket, unisex, size M. Barely worn.',
+    price: { amount: 450, currency: 'GHS', unit: 'item', negotiable: true },
+    location: { area: 'Osu', city: 'Accra', country: 'GH' },
+    images: [
+      require('../assets/images/pexels-stevedoessteve-27867019.jpg'),
+      require('../assets/images/pexels-stevedoessteve-31300187.jpg'),
+      require('../assets/images/pexels-stevedoessteve-31300139.jpg'),
+    ],
+    tags: ['fashion', 'jacket'],
+    postedBy: users.esi,
+    createdAt: hoursAgo(5),
+    status: 'open',
+    details: { condition: 'like_new', stock: 1, delivery: ['pickup', 'courier'] },
+  },
+  {
+    id: 'l-7',
+    kind: 'product',
+    title: 'Summer floral dress',
+    description: 'A light and breezy summer dress with a floral print. Sizes S–L available.',
+    price: { amount: 280, currency: 'GHS', unit: 'item', negotiable: false },
+    location: { area: 'Kasoa', city: 'Central Region', country: 'GH' },
+    images: [
+      require('../assets/images/pexels-stevedoessteve-28105357.jpg'),
+      require('../assets/images/pexels-stevedoessteve-31300139.jpg'),
+    ],
+    tags: ['fashion', 'dress'],
+    postedBy: users.esi,
+    createdAt: hoursAgo(26),
+    status: 'open',
+    details: { condition: 'new', stock: 6, delivery: ['pickup', 'seller_delivers'] },
+  },
+  {
+    id: 'l-8',
+    kind: 'service',
+    title: 'Plumbing repairs and installation',
+    description:
+      'Leaks, burst pipes, water heaters and bathroom fittings for homes and offices. Same-day call-outs.',
+    price: { amount: 120, currency: 'GHS', unit: 'hour', negotiable: true },
+    location: { area: 'Adenta', city: 'Accra', country: 'GH' },
+    images: [require('../assets/images/pexels-subhankar-sarkar-825689708-33576320.jpg')],
+    tags: ['plumbing', 'repairs'],
+    postedBy: users.bright,
+    createdAt: hoursAgo(72),
+    status: 'open',
+    details: { hours: 'Mon–Sat, 7am–7pm', serviceRadiusKm: 15 },
+  },
+  {
+    id: 'l-9',
+    kind: 'service',
+    title: 'Electrical wiring and repairs',
+    description: 'Sockets, lighting, rewiring and fault finding. Certified and insured.',
+    price: { amount: 100, currency: 'GHS', unit: 'hour', negotiable: true },
+    location: currentUser.location,
+    images: [],
+    tags: ['electrical', 'repairs'],
+    postedBy: users.me,
+    createdAt: hoursAgo(100),
+    status: 'open',
+    details: { hours: 'Mon–Fri, 8am–6pm', serviceRadiusKm: 10 },
+  },
+];

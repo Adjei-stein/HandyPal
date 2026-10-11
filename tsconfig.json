@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
-    "moduleResolution": "node",
     "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "target": "ESNext",
     "module": "ESNext",
     "lib": [

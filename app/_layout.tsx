@@ -1,14 +1,15 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider } from "expo-router/react-navigation";
 import { useFonts } from 'expo-font';
-import * as NavigationBar from 'expo-navigation-bar';
+import { NavigationBar } from 'expo-navigation-bar';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect } from 'react';
-import { Platform } from 'react-native';
 import 'react-native-reanimated';
 
+import { ListingsProvider } from '@/context/ListingsContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import '../global.css';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -19,11 +20,6 @@ export default function RootLayout() {
   useEffect(() => {
     const color = colorScheme === 'dark' ? '#18181b' : '#fff';
     SystemUI.setBackgroundColorAsync(color);
-
-    if (Platform.OS === 'android') {
-      NavigationBar.setBackgroundColorAsync(color);
-      NavigationBar.setButtonStyleAsync(colorScheme === 'dark' ? 'light' : 'dark');
-    }
   }, [colorScheme]);
 
   if (!loaded) {
@@ -32,15 +28,17 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar
-        style={colorScheme === 'dark' ? 'light' : 'dark'}
-        backgroundColor={colorScheme === 'dark' ? '#18181b' : '#fff'}
-      />
-    </ThemeProvider>
+    <ListingsProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="listing/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        {/* Android is edge-to-edge: the system bars are transparent over the screen, so only their content colour is set. */}
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        <NavigationBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+      </ThemeProvider>
+    </ListingsProvider>
   );
 }

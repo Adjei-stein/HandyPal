@@ -1,23 +1,13 @@
-import { Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-
-interface InboxItem {
-  id: number;
-  name: string;
-  lastMessage: string;
-  time: string;
-  unread: boolean;
-}
+import { Text, TouchableOpacity, View } from 'react-native';
+import { Conversation } from './ChatPage';
 
 interface InboxPageProps {
-  onSelectConversation?: (conversation: any) => void;
+  onSelectConversation?: (conversation: Conversation) => void;
 }
 
 const InboxPage: React.FC<InboxPageProps> = ({ onSelectConversation }) => {
-  const { width } = useWindowDimensions();
-  const isMobile = width < 768;
-
   // Sample inbox data
-  const inboxItems = [
+  const inboxItems: Conversation[] = [
     {
       id: 1,
       name: 'Alex Johnson',
@@ -51,24 +41,13 @@ const InboxPage: React.FC<InboxPageProps> = ({ onSelectConversation }) => {
     <View className="w-full h-full bg-zinc-900 p-4">
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-white text-xl font-bold">Messages</Text>
-        <TouchableOpacity 
-          className="bg-blue-500 px-4 py-2 rounded-md"
-          onPress={() => console.log('Create group')}
-        >
-          <Text className="text-white">Create Group</Text>
-        </TouchableOpacity>
       </View>
 
       {inboxItems.map((item) => (
         <TouchableOpacity 
           key={item.id} 
           className={`p-3 mb-2 rounded-md ${item.unread ? 'bg-zinc-800' : 'bg-zinc-900'}`}
-          onPress={() => {
-            const conversation = inboxItems.find(i => i.id === item.id);
-            if (onSelectConversation && conversation) {
-              onSelectConversation(conversation);
-            }
-          }}
+          onPress={() => onSelectConversation?.(item)}
         >
           <View className="flex-row justify-between">
             <Text className={`font-bold ${item.unread ? 'text-white' : 'text-gray-400'}`}>{item.name}</Text>
